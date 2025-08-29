@@ -39,7 +39,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
     try {
       final response = await http.post(
         Uri.parse(url),
-        headers: Config.headers,
+        headers: await Config.getAuthHeaders(),
         body: jsonEncode(data),
       );
 

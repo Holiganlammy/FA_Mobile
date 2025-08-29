@@ -246,7 +246,7 @@ class _QRViewPageState extends State<QRViewPage> {
                         String url = '${Config.apiURL}/addAsset';
                         var response = await http.post(
                           Uri.parse(url),
-                          headers: Config.headers,
+                          headers: await Config.getAuthHeaders(),
                           body: jsonEncode({
                             "Name": qrData['Name'],
                             "Code": qrData["Code"],
@@ -397,22 +397,22 @@ class _QRViewPageState extends State<QRViewPage> {
         var url = Uri.parse('${Config.apiURL}/FA_Mobile_UploadImage');
         await client.post(
           url,
-          headers: Config.headers,
+          headers: await Config.getAuthHeaders(),
           body: jsonEncode({
             "Code": code,
             "RoundID": widget.periodID,
             "index": index,
             "url":
-                "http://vpnptec.dyndns.org:33080/NEW_NAC/$attValue.$extension",
+                "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension",
           }),
         );
         setState(() {
           if (index == 0) {
             listImage_count[0] =
-                "http://vpnptec.dyndns.org:33080/NEW_NAC/$attValue.$extension";
+                "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension";
           } else if (index == 1) {
             listImage_count[1] =
-                "http://vpnptec.dyndns.org:33080/NEW_NAC/$attValue.$extension";
+                "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension";
           }
         });
         print("✅ อัปโหลดสำเร็จ!");

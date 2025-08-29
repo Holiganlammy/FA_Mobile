@@ -132,7 +132,7 @@ class _MenuPageState extends State<MenuPage> {
     try {
       var response = await http.post(
         Uri.parse('${Config.apiURL}/permission_branch'),
-        headers: Config.headers,
+        headers: await Config.getAuthHeaders(),
         body: jsonEncode({'userCode': widget.usercode}),
       );
       if (response.statusCode == 200) {

@@ -79,7 +79,7 @@ class _CountedlistState extends State<Countedlist> {
     try {
       var response = await http.post(
         Uri.parse(url),
-        headers: Config.headers,
+        headers: await Config.getAuthHeaders(),
         body: jsonEncode(request),
       );
 
@@ -478,14 +478,14 @@ class _CountedlistState extends State<Countedlist> {
         String attValue = jsonData['attach'][0]['ATT'];
         String extension = jsonData['extension'];
         String imageUrl =
-            "http://vpnptec.dyndns.org:33080/NEW_NAC/$attValue.$extension";
+            "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension";
 
         var client = http.Client();
         var url = Uri.parse('${Config.apiURL}/FA_Mobile_UploadImage');
 
         await client.post(
           url,
-          headers: Config.headers,
+          headers: await Config.getAuthHeaders(),
           body: jsonEncode({
             "Code": code,
             "RoundID": widget.periodID,
@@ -562,7 +562,7 @@ class _CountedlistState extends State<Countedlist> {
 
                       var response = await http.post(
                         Uri.parse(url),
-                        headers: Config.headers,
+                        headers: await Config.getAuthHeaders(),
                         body: jsonEncode({
                           "Reference": selectedOption,
                           "Code": filteredAssets[index]['Code'],
@@ -674,7 +674,7 @@ class _CountedlistState extends State<Countedlist> {
 
                       var response = await http.post(
                         Uri.parse(url),
-                        headers: Config.headers,
+                        headers: await Config.getAuthHeaders(),
                         body: jsonEncode({
                           "Name": filteredAssets[index]['Name'],
                           "Code": filteredAssets[index]['Code'],

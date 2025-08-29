@@ -56,7 +56,7 @@ class _MyPeriodState extends State<MyPeriod> {
     try {
       var response = await http.post(
         Uri.parse(url),
-        headers: Config.headers,
+        headers: await Config.getAuthHeaders(),
         body: jsonEncode(request),
       );
       if (response.statusCode == 200) {

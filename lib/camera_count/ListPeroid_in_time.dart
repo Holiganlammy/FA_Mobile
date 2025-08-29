@@ -57,7 +57,7 @@ class _MyPeriodState extends State<MyPeriodInTime> {
     try {
       var response = await http.post(
         Uri.parse(url),
-        headers: Config.headers,
+        headers: await Config.getAuthHeaders(),
         body: jsonEncode(request),
       );
       if (response.statusCode == 200) {

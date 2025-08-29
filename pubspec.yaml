@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.0.7+12
+version: 2.1.1+14
 
 environment:
   sdk: ^3.6.1
@@ -49,8 +49,10 @@ dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path_android: "assets/icon/Purethai(FA-Beta) 2.png"
-  image_path_ios: "assets/icon/Purethai(FA-Beta) 2.png"
+  image_path_android: "assets/icon/FA_Purethai_Icon_V3.png"
+  image_path_ios: "assets/icon/FA_Purethai_Icon_V3.png"
+  adaptive_icon_background: "#ffffff"  # หรือ background ที่เข้ากับโลโก้
+  adaptive_icon_foreground: "assets/icon/FA_Purethai_Icon_V3.png"
 
 dev_dependencies:
   flutter_test:
@@ -72,7 +74,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets:
+    - assets/images/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

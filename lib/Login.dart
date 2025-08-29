@@ -1,4 +1,5 @@
 import 'package:fa_mobile_app/ListMenu.dart';
+import 'package:fa_mobile_app/resetPassword.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:fa_mobile_app/config.dart';
@@ -31,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ฟังก์ชัน Login API
+
   Future<void> _login() async {
     String url = '${Config.apiURL}/login';
 
@@ -43,31 +45,61 @@ class _LoginPageState extends State<LoginPage> {
     try {
       var response = await http.post(
         Uri.parse(url),
-        headers: Config.headers,
+        headers: await await Config.getAuthHeaders(),
         body: jsonEncode(data),
       );
 
       if (response.statusCode == 200) {
-        var responseData = jsonDecode(response.body)["data"];
-        var depcode = jsonDecode(response.body)["data"][0]["depcode"];
-        var userid = jsonDecode(response.body)["data"][0]["userid"];
+        var json = jsonDecode(response.body);
+        var responseData = json["data"];
+        var depcode = json["data"][0]["depcode"];
+        var userid = json["data"][0]["userid"];
+        var token = json["token"];
+        var resetToken = json["request_reset_token"];
+        var expirePassword = json["expirepassword"];
+        var changePassword = json["data"][0]["changepassword"];
 
-        print("✅ Login Success: ${responseData}");
+        print("✅ Login Success");
 
+        final prefs = await SharedPreferences.getInstance();
+        if (token != null) {
+          await prefs.setString('token', token);
+        }
+        
+        if (resetToken != null) {
+          await prefs.setString('resetToken', resetToken);
+        }
         _saveLoginData(_usernameController.text, depcode, userid);
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MenuPage(
-              usercode: _usernameController.text,
-              depcode: depcode,
-              time: DateFormat('yyyy-MM-dd HH:mm')
-                  .format(DateTime.now().toLocal())
-                  .toString(),
+        if (expirePassword == true || changePassword == false) {
+          print("🔄 Redirecting to Reset Password");
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResetPasswordPage(
+                usercode: _usernameController.text,
+                userid: userid,
+                depcode: depcode,
+                resetToken: resetToken ?? '',
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          // Login สำเร็จ ไปหน้า Menu
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MenuPage(
+                usercode: _usernameController.text,
+                depcode: depcode,
+                time: DateFormat('yyyy-MM-dd HH:mm')
+                    .format(DateTime.now().toLocal())
+                    .toString(),
+              ),
+            ),
+          );
+        }
       } else {
         print("❌ Login Failed: ${response.body}");
         _showDialog("Login ผิดพลาด", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
@@ -112,11 +144,25 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                'Welcome to FA Mobile 2025',
-                style: TextStyle(
-                    fontSize: screenWidth * 0.08, fontWeight: FontWeight.bold),
-              ),
+               Image.asset(
+                  'assets/images/purethai-2.png',
+                  width: screenWidth * 0.6,
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                Text(
+                  'Purethai',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.08,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Fix Assets Mobile',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.08,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               SizedBox(height: screenHeight * 0.04),
               TextField(
                 controller: _usernameController,
