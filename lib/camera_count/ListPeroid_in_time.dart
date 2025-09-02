@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fa_mobile_app/services/httpService.dart';
 
 class MyPeriodInTime extends StatefulWidget {
   final String usercode, time, branchName;
@@ -55,8 +56,9 @@ class _MyPeriodState extends State<MyPeriodInTime> {
     };
 
     try {
-      var response = await http.post(
-        Uri.parse(url),
+      var response = await HttpWithAuth.post(
+        context: context,
+        url: Uri.parse(url),
         headers: await Config.getAuthHeaders(),
         body: jsonEncode(request),
       );

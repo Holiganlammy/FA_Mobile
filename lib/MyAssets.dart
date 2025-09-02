@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:fa_mobile_app/services/httpService.dart';
 
 class MyAssets extends StatefulWidget {
   final String usercode;
@@ -45,8 +46,9 @@ class _MyAssetsState extends State<MyAssets> {
     };
 
     try {
-      var response = await http.post(
-        Uri.parse(url),
+      var response = await HttpWithAuth.post(
+        context: context,
+        url: Uri.parse(url),
         headers: await Config.getAuthHeaders(),
         body: jsonEncode(request),
       );

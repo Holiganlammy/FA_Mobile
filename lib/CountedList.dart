@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fa_mobile_app/services/httpService.dart';
 
 class Countedlist extends StatefulWidget {
   final String usercode;
@@ -77,8 +78,9 @@ class _CountedlistState extends State<Countedlist> {
     };
 
     try {
-      var response = await http.post(
-        Uri.parse(url),
+      var response = await HttpWithAuth.post(
+        context: context,
+        url: Uri.parse(url),
         headers: await Config.getAuthHeaders(),
         body: jsonEncode(request),
       );
@@ -91,14 +93,9 @@ class _CountedlistState extends State<Countedlist> {
 
         setState(() {
           assetsItems = responseData;
-          filteredAssets = assetsItems.where((asset) {
-            bool matchesSearchTerm =
-                asset['remarker']?.toLowerCase().contains(statusFilter) == true;
-            return matchesSearchTerm;
-          }).toList();
-          ; // Initially, no filter
           isLoading = false; // Data is loaded, set loading to false
         });
+        filterAssets(); // เรียกใช้ฟังก์ชัน filterAssets แทน
       } else {
         setState(() {
           isLoading = false;
@@ -299,25 +296,60 @@ class _CountedlistState extends State<Countedlist> {
                                         String imageUrl = snapshot.data ??
                                             'https://thumb.ac-illust.com/b1/b170870007dfa419295d949814474ab2_t.jpeg';
                                         return InkWell(
-                                          onTap: () => _pickImage(
+                                          onTap: () => _showImageOptions(
+                                              imageUrl,
                                               filteredAssets[indexList]['Code'],
                                               index,
                                               indexList,
                                               () => setState(() {})),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                            child: CachedNetworkImage(
-                                              imageUrl: imageUrl,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) =>
-                                                  const Center(
-                                                      child:
-                                                          CircularProgressIndicator()),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      _buildPlaceholderImage(),
-                                            ),
+                                          child: Stack(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                child: CachedNetworkImage(
+                                                  imageUrl: imageUrl,
+                                                  fit: BoxFit.cover,
+                                                  width: double.infinity,
+                                                  height: double.infinity,
+                                                  placeholder: (context, url) =>
+                                                      const Center(
+                                                          child:
+                                                              CircularProgressIndicator()),
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          _buildPlaceholderImage(),
+                                                ),
+                                              ),
+                                              // Icon overlay
+                                              Positioned(
+                                                top: 8,
+                                                right: 8,
+                                                child: Container(
+                                                  padding: EdgeInsets.all(4),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black.withOpacity(0.6),
+                                                    borderRadius: BorderRadius.circular(15),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.camera_alt,
+                                                        color: Colors.white,
+                                                        size: 16,
+                                                      ),
+                                                      SizedBox(width: 2),
+                                                      Icon(
+                                                        Icons.zoom_in,
+                                                        color: Colors.white,
+                                                        size: 16,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         );
                                       },
@@ -417,14 +449,26 @@ class _CountedlistState extends State<Countedlist> {
     );
   }
 
-  Future<void> _pickImage(
-      String code, int index, int assetIndex, Function setStateCallback) async {
+  // ฟังก์ชันแสดงตัวเลือก: ดูรูปขนาดเต็ม หรือ อัพโหลดรูปใหม่
+  Future<void> _showImageOptions(String imageUrl, String code, int index,
+      int assetIndex, Function setStateCallback) async {
+    bool isPlaceholder = imageUrl.contains('thumb.ac-illust.com');
+    
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return SafeArea(
           child: Wrap(
             children: [
+              if (!isPlaceholder) // แสดงตัวเลือก "ดูรูปขนาดเต็ม" เฉพาะเมื่อมีรูปจริง
+                ListTile(
+                  leading: const Icon(Icons.zoom_in),
+                  title: const Text('ดูรูปขนาดเต็ม'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showImageDialog(imageUrl, 'รูปภาพทรัพย์สิน $code');
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
                 title: const Text('เลือกจากแกลเลอรี'),
@@ -442,6 +486,145 @@ class _CountedlistState extends State<Countedlist> {
                   await _getImage(ImageSource.camera, code, index, assetIndex,
                       setStateCallback);
                 },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ฟังก์ชันแสดงรูปภาพขนาดเต็ม
+  void _showImageDialog(String imageUrl, String title) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.85), // พื้นหลังสีดำอ่อนๆ
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Stack(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.transparent,
+                ),
+              ),
+              Center(
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: InteractiveViewer( // เพิ่มการ zoom ได้
+                    maxScale: 3.0,
+                    minScale: 0.5,
+                    child: Center(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        height: double.infinity,
+                        placeholder: (context, url) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(color: Colors.white),
+                              SizedBox(height: 16),
+                              Text(
+                                "กำลังโหลดรูปภาพ...",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.broken_image, size: 80, color: Colors.white),
+                              SizedBox(height: 16),
+                              Text(
+                                "ไม่สามารถโหลดรูปได้",
+                                style: TextStyle(color: Colors.white, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // หัวข้อด้านบน
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 10,
+                left: 20,
+                right: 70,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              // ปุ่มปิด
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 15,
+                right: 20,
+                child: InkWell(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+              // คำแนะนำการใช้งาน
+              Positioned(
+                bottom: MediaQuery.of(context).padding.bottom + 20,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.zoom_in, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        "หยิกเพื่อซูม • แตะเพื่อปิด",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -560,8 +743,9 @@ class _CountedlistState extends State<Countedlist> {
                           await SharedPreferences.getInstance();
                       String url = '${Config.apiURL}/updateReference';
 
-                      var response = await http.post(
-                        Uri.parse(url),
+                      var response = await HttpWithAuth.post(
+                        context: context,
+                        url: Uri.parse(url),
                         headers: await Config.getAuthHeaders(),
                         body: jsonEncode({
                           "Reference": selectedOption,
@@ -672,8 +856,9 @@ class _CountedlistState extends State<Countedlist> {
                           await SharedPreferences.getInstance();
                       String url = '${Config.apiURL}/addAsset';
 
-                      var response = await http.post(
-                        Uri.parse(url),
+                      var response = await HttpWithAuth.post(
+                        context: context,
+                        url: Uri.parse(url),
                         headers: await Config.getAuthHeaders(),
                         body: jsonEncode({
                           "Name": filteredAssets[index]['Name'],

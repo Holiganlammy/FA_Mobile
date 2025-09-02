@@ -8,6 +8,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'qr_view_page.dart'; // นำเข้าไฟล์หน้าผลลัพธ์
 import 'package:http/http.dart' as http;
+import 'package:fa_mobile_app/services/httpService.dart';
+import 'package:image_picker/image_picker.dart';
 
 class QRScannerCountPage extends StatefulWidget {
   final String usercode;
@@ -46,8 +48,9 @@ class _QRScannerPageState extends State<QRScannerCountPage> {
     final Map<String, String> data = {'Code': qrText};
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
+      final response = await HttpWithAuth.post(
+        context: context,
+        url: Uri.parse(url),
         headers: await Config.getAuthHeaders(),
         body: jsonEncode(data),
       );
@@ -87,6 +90,39 @@ class _QRScannerPageState extends State<QRScannerCountPage> {
       cameraController.dispose();
     }
   }
+
+  // // ฟังก์ชันเลือกรูปจากแกลเลอรี่และสแกน QR
+  // Future<void> scanQRFromGallery() async {
+  //   try {
+  //     final ImagePicker picker = ImagePicker();
+  //     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      
+  //     if (pickedFile == null) return;
+
+  //     // สร้าง controller ใหม่สำหรับอ่านรูปจากแกลเลอรี่
+  //     final MobileScannerController galleryController = MobileScannerController();
+      
+  //     try {
+  //       // ใช้ analyzeImage ของ mobile_scanner
+  //       final BarcodeCapture? result = await galleryController.analyzeImage(pickedFile.path);
+        
+  //       if (result != null && result.barcodes.isNotEmpty) {
+  //         String qrResult = result.barcodes.first.rawValue ?? "ไม่พบข้อมูล";
+  //         print("QR Code from gallery: $qrResult");
+  //         await sendQRCodeToAPI(qrResult);
+  //       } else {
+  //         _showDialog("แจ้งเตือน", "ไม่พบ QR Code ในรูปภาพที่เลือก");
+  //       }
+  //     } catch (e) {
+  //       print("Error analyzing image: $e");
+  //       _showDialog("เกิดข้อผิดพลาด", "ไม่สามารถอ่าน QR Code จากรูปภาพได้");
+  //     } finally {
+  //       galleryController.dispose();
+  //     }
+  //   } catch (e) {
+  //     _showDialog("เกิดข้อผิดพลาด", "เกิดข้อผิดพลาดในการเลือกรูปภาพ: ${e.toString()}");
+  //   }
+  // }
 
   // ฟังก์ชันแสดง Dialog แจ้งเตือน
   void _showDialog(String title, String message) {
@@ -174,7 +210,6 @@ class _QRScannerPageState extends State<QRScannerCountPage> {
               ),
             ),
           ),
-          // เอฟเฟกต์เส้นเลเซอร์
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:fa_mobile_app/MyAssets.dart';
 import 'package:fa_mobile_app/config.dart';
 import 'package:fa_mobile_app/Login.dart';
+import 'package:fa_mobile_app/services/httpService.dart';
 
 class MenuPage extends StatefulWidget {
   final String usercode;
@@ -130,8 +131,9 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> _permissionBranch() async {
     try {
-      var response = await http.post(
-        Uri.parse('${Config.apiURL}/permission_branch'),
+      var response = await HttpWithAuth.post(
+        context: context,
+        url: Uri.parse('${Config.apiURL}/permission_branch'),
         headers: await Config.getAuthHeaders(),
         body: jsonEncode({'userCode': widget.usercode}),
       );
@@ -189,6 +191,10 @@ class _MenuPageState extends State<MenuPage> {
               ),
               actions: [
                 TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text("ยกเลิก"),
+                ),
+                                TextButton(
                   onPressed: () {
                     setState(() {
                       selectedAssetOption = tempSelectedOption; // อัปเดตค่าหลัก
@@ -221,10 +227,6 @@ class _MenuPageState extends State<MenuPage> {
                     }
                   },
                   child: Text("ยืนยัน"),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text("ยกเลิก"),
                 ),
               ],
             );

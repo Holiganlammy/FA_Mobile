@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'qr_view_page.dart'; // นำเข้าไฟล์หน้าผลลัพธ์
 import 'package:http/http.dart' as http;
+import 'package:fa_mobile_app/services/httpService.dart';
+import 'package:image_picker/image_picker.dart';
 
 class QRScannerPage extends StatefulWidget {
   final String usercode;
@@ -37,8 +39,9 @@ class _QRScannerPageState extends State<QRScannerPage> {
     final Map<String, String> data = {'Code': qrText};
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
+      final response = await HttpWithAuth.post(
+        context: context,
+        url: Uri.parse(url),
         headers: await Config.getAuthHeaders(),
         body: jsonEncode(data),
       );
@@ -75,6 +78,31 @@ class _QRScannerPageState extends State<QRScannerPage> {
       cameraController.dispose();
     }
   }
+
+  // Future<void> scanQRFromGallery() async {
+  //   try {
+  //     final ImagePicker picker = ImagePicker();
+  //     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  //     if (pickedFile == null) return;
+
+  //     // ใช้ mobile_scanner แทน google_mlkit
+  //     final MobileScannerController galleryController = MobileScannerController();
+      
+  //     // อ่าน QR จากรูปภาพ
+  //     final BarcodeCapture? result = await galleryController.analyzeImage(pickedFile.path);
+      
+  //     if (result != null && result.barcodes.isNotEmpty) {
+  //       String qrResult = result.barcodes.first.rawValue ?? "ไม่พบข้อมูล";
+  //       await sendQRCodeToAPI(qrResult);
+  //     } else {
+  //       _showDialog("แจ้งเตือน", "ไม่พบ QR Code ในรูปภาพ");
+  //     }
+      
+  //     galleryController.dispose();
+  //   } catch (e) {
+  //     _showDialog("เกิดข้อผิดพลาด", e.toString());
+  //   }
+  // }
 
   // ฟังก์ชันแสดง Dialog แจ้งเตือน
   void _showDialog(String title, String message) {
@@ -160,7 +188,6 @@ class _QRScannerPageState extends State<QRScannerPage> {
               ),
             ),
           ),
-          // เอฟเฟกต์เส้นเลเซอร์
         ],
       ),
     );
