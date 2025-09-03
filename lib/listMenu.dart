@@ -7,6 +7,7 @@ import 'package:fa_mobile_app/MyAssets.dart';
 import 'package:fa_mobile_app/config.dart';
 import 'package:fa_mobile_app/Login.dart';
 import 'package:fa_mobile_app/services/httpService.dart';
+import 'package:fa_mobile_app/changePassword.dart';
 
 class MenuPage extends StatefulWidget {
   final String usercode;
@@ -43,6 +44,11 @@ class _MenuPageState extends State<MenuPage> {
       'title': 'ตรวจสอบคิวอาร์โค้ด',
       'subtitle': 'Verify QR Code.',
       'icon': 'verified'
+    },
+    {
+      'title': 'เปลี่ยนรหัสผ่าน',
+      'subtitle': 'Change Password.',
+      'icon': 'lock'
     },
   ];
 
@@ -123,6 +129,13 @@ class _MenuPageState extends State<MenuPage> {
           depcode: widget.depcode,
         ));
         break;
+      case 'เปลี่ยนรหัสผ่าน':
+        _navigateTo(ChangePasswordPage(
+          usercode: widget.usercode,
+          time: widget.time,
+          depcode: widget.depcode,
+        ));
+        break;
     }
   }
 
@@ -194,7 +207,7 @@ class _MenuPageState extends State<MenuPage> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text("ยกเลิก"),
                 ),
-                                TextButton(
+                TextButton(
                   onPressed: () {
                     setState(() {
                       selectedAssetOption = tempSelectedOption; // อัปเดตค่าหลัก
@@ -258,6 +271,8 @@ class _MenuPageState extends State<MenuPage> {
         return Icons.account_circle;
       case 'verified':
         return Icons.verified;
+      case 'lock':
+        return Icons.lock;
       case 'report':
         return Icons.report;
       default:

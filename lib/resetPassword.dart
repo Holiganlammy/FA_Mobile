@@ -318,9 +318,22 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             if (value == null || value.isEmpty) {
                               return 'กรุณากรอกรหัสผ่านใหม่';
                             }
-                            if (value.length < 6) {
-                              return 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร';
+                            if (value.length < 8) {
+                              return 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร';
                             }
+                            
+                            // ตรวจสอบตัวอักษรใหญ่
+                            bool hasUppercase = value.contains(RegExp(r'[A-Z]'));
+                            if (!hasUppercase) {
+                              return 'รหัสผ่านต้องมีตัวอักษรใหญ่อย่างน้อย 1 ตัว (A-Z)';
+                            }
+                            
+                            // ตรวจสอบอักษรพิเศษ
+                            bool hasSpecialChar = value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>_-]'));
+                            if (!hasSpecialChar) {
+                              return 'รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว';
+                            }
+                            
                             return null;
                           },
                         ),
@@ -437,7 +450,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        '• ความยาวอย่างน้อย 8 ตัวอักษร\n• ตัวอักษรพิมพ์ใหญ่ อย่างน้อย 1 ตัว (A-Z)\n• ตัวอักษรภาษาอังกฤษ อย่างน้อย 1 ตัว\n• ตัวเลข อย่างน้อย 1 ตัว (0-9)\n• อักขระพิเศษ อย่างน้อย 1 ตัว (!@#\$&*~)',
+                        '• ความยาวอย่างน้อย 8 ตัวอักษร\n• ตัวอักษรพิมพ์ใหญ่ อย่างน้อย 1 ตัว (A-Z)\n• อักขระพิเศษ อย่างน้อย 1 ตัว (!@#\$%^&*_-...)',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.blue[600],

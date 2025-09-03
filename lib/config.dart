@@ -31,6 +31,7 @@ class Config {
       "http://10.20.100.29:33052/api"; //Ipconfig 49.0.64.71:32001
   static const String apiURL_Server =
       "https://nac.purethai.co.th/api";
+  static const String apiURL_Test = "http://10.20.105.38:32001/api";
   static const String apiURL = apiURL_Server;
 }
 
