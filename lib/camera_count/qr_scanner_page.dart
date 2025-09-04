@@ -210,6 +210,16 @@ class _QRScannerPageState extends State<QRScannerCountPage> {
               ),
             ),
           ),
+          // // ปุ่มเลือกรูปจากแกลเลอรี่
+          // Positioned(
+          //   bottom: 16,
+          //   left: 16,
+          //   right: 16,
+          //   child: ElevatedButton(
+          //     onPressed: scanQRFromGallery,
+          //     child: Text("เลือกรูปจากแกลเลอรี่"),
+          //   ),
+          // ),
         ],
       ),
     );

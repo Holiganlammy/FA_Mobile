@@ -258,42 +258,102 @@ class _MyAssetsState extends State<MyAssets> {
                                             String imageUrl = snapshot.data ??
                                                 'https://thumb.ac-illust.com/b1/b170870007dfa419295d949814474ab2_t.jpeg';
                                             return InkWell(
-                                              onTap: () => _pickImage(
-                                                  filteredAssets[indexList]['Code'],
-                                                  index),
+                                              onTap: () => _showImageOptionsDialog(
+                                                imageUrl,
+                                                "รูปภาพทรัพย์สิน ${index + 1}",
+                                                filteredAssets[indexList]['Code'],
+                                                index
+                                              ),
                                               child: Stack(
                                                 children: [
                                                   ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(10.0),
-                                                    child: CachedNetworkImage(
-                                                      imageUrl: imageUrl,
-                                                      fit: BoxFit.cover,
-                                                      width: double.infinity,
-                                                      height: double.infinity,
-                                                      placeholder: (context, url) =>
-                                                          const Center(
-                                                              child:
-                                                                  CircularProgressIndicator()),
-                                                      errorWidget: (context, url,
-                                                              error) =>
-                                                          _buildPlaceholderImage(),
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                          color: Colors.grey.shade300,
+                                                          width: 1,
+                                                        ),
+                                                        borderRadius: BorderRadius.circular(10.0),
+                                                      ),
+                                                      child: Stack(
+                                                        fit: StackFit.expand,
+                                                        children: [
+                                                          CachedNetworkImage(
+                                                            imageUrl: imageUrl,
+                                                            fit: BoxFit.cover,
+                                                            placeholder: (context, url) => Container(
+                                                              color: Colors.grey[200],
+                                                              child: const Center(
+                                                                child: CircularProgressIndicator(),
+                                                              ),
+                                                            ),
+                                                            errorWidget: (context, url, error) =>
+                                                                _buildPlaceholderImage(),
+                                                          ),
+                                                          // Overlay บอกว่าดูได้
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                              gradient: LinearGradient(
+                                                                begin: Alignment.topCenter,
+                                                                end: Alignment.bottomCenter,
+                                                                colors: [
+                                                                  Colors.transparent,
+                                                                  Colors.black.withOpacity(0.3),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          // ไอคอนแสดงว่าสามารถดูได้
+                                                          Positioned(
+                                                            top: 8,
+                                                            right: 8,
+                                                            child: Container(
+                                                              padding: EdgeInsets.all(4),
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.black.withOpacity(0.6),
+                                                                borderRadius: BorderRadius.circular(15),
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons.camera_alt,
+                                                                    color: Colors.white,
+                                                                    size: 16,
+                                                                  ),
+                                                                  SizedBox(width: 2),
+                                                                  Icon(
+                                                                    Icons.zoom_in,
+                                                                    color: Colors.white,
+                                                                    size: 16,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
-                                                  // เพิ่มไอคอนกล้องเพื่อบอกว่าสามารถกดได้
+                                                  // ป้ายกำกับตำแหน่งรูป
                                                   Positioned(
-                                                    bottom: 5,
-                                                    right: 5,
+                                                    top: 8,
+                                                    left: 8,
                                                     child: Container(
-                                                      padding: EdgeInsets.all(4),
+                                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                       decoration: BoxDecoration(
-                                                        color: Colors.black54,
-                                                        borderRadius: BorderRadius.circular(15),
+                                                        color: Colors.black.withOpacity(0.7),
+                                                        borderRadius: BorderRadius.circular(12),
                                                       ),
-                                                      child: Icon(
-                                                        Icons.camera_alt,
-                                                        color: Colors.white,
-                                                        size: 16,
+                                                      child: Text(
+                                                        "รูปที่ ${index + 1}",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
@@ -360,6 +420,235 @@ class _MyAssetsState extends State<MyAssets> {
             ),
         ],
       ),
+    );
+  }
+
+  // ฟังก์ชั่นแสดงตัวเลือกสำหรับรูปภาพ
+  void _showImageOptionsDialog(String imagePath, String title, String code, int index) async {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                SizedBox(height: 20),
+                // ตัวเลือกต่างๆ
+                ListTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.zoom_in, color: Colors.blue[600]),
+                  ),
+                  title: Text('ดูรูปภาพขนาดเต็ม'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showFullScreenImage(imagePath, title);
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.photo_library, color: Colors.green[600]),
+                  ),
+                  title: Text('เลือกจากแกลเลอรี'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _getImage(ImageSource.gallery, code, index);
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.camera_alt, color: Colors.orange[600]),
+                  ),
+                  title: Text('ถ่ายภาพ'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _getImage(ImageSource.camera, code, index);
+                  },
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ฟังก์ชั่นแสดงรูปแบบเต็มหน้าจอ
+  void _showFullScreenImage(String imageUrl, String title) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.85),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Stack(
+            children: [
+              // Background ที่สามารถแตะเพื่อปิดได้
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.transparent,
+                ),
+              ),
+              // รูปภาพเต็มหน้าจอ
+              Center(
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: InteractiveViewer(
+                    maxScale: 3.0,
+                    minScale: 0.5,
+                    child: Center(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        height: double.infinity,
+                        placeholder: (context, url) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(color: Colors.white),
+                              SizedBox(height: 16),
+                              Text(
+                                "กำลังโหลดรูปภาพ...",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.broken_image, size: 80, color: Colors.white),
+                              SizedBox(height: 16),
+                              Text(
+                                "ไม่สามารถโหลดรูปได้",
+                                style: TextStyle(color: Colors.white, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // หัวข้อด้านบน
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 10,
+                left: 20,
+                right: 70,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              // ปุ่มปิด
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 15,
+                right: 20,
+                child: InkWell(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+              // คำแนะนำการใช้งาน
+              Positioned(
+                bottom: MediaQuery.of(context).padding.bottom + 20,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.zoom_in, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        "หยิกเพื่อซูม • แตะเพื่อปิด",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

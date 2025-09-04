@@ -1050,6 +1050,7 @@ class _QRViewPageState extends State<QRViewPage> {
             setState(() {
               listImage_count[index] = imageUrl;
             });
+            await _updateAssetImage(code, index, attValue, extension);
             // print("✅ อัปโหลดสำเร็จ!");
             
             // แสดง SnackBar แจ้งผลสำเร็จ
@@ -1102,6 +1103,57 @@ class _QRViewPageState extends State<QRViewPage> {
       setState(() {
         isUploading[index] = false;
       });
+    }
+  }
+
+  // ปิดฟังก์ชั่นอัพรูปลง E-Book หลังจากตรวจนับ ต.ค 2025 เสร็จ
+  Future<void> _updateAssetImage(String code, int index, String attValue, String extension) async {
+    try {
+      print("🔄 เริ่มอัปเดตข้อมูลรูปเข้าระบบ EBook...");
+
+      String newImageUrl = "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension";
+
+      // ใช้ข้อมูลจาก widget.qrText[0] เพราะเราไม่ได้มี list
+      var currentAsset = widget.qrText[0];
+
+      String? image1 = index == 0 ? newImageUrl : currentAsset["ImagePath"];
+      String? image2 = index == 1 ? newImageUrl : currentAsset["ImagePath_2"];
+
+      print("📤 image_1: $image1");
+      print("📤 image_2: $image2");
+
+      var response = await http.post(
+        Uri.parse('${Config.apiURL}/FA_Control_Edit_EBook'),
+        headers: await Config.getAuthHeaders(),
+        body: jsonEncode({
+          "Code": code,
+          "image_1": image1,
+          "image_2": image2,
+        }),
+      );
+
+      print("📊 Status Code: ${response.statusCode}");
+      print("📄 Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        // ✅ อัปเดตสำเร็จ — ให้ refresh รูปใหม่บน UI ด้วย
+        setState(() {
+          widget.qrText[0]["ImagePath"] = image1;
+          widget.qrText[0]["ImagePath_2"] = image2;
+        });
+
+        _showDialog("อัปโหลดสำเร็จ", "อัปเดตรูป EBook กับรายงานตรวจนับทรัพย์สิน สำเร็จแล้ว");
+      } else {
+        try {
+          final data = jsonDecode(response.body);
+          _showDialog("เกิดข้อผิดพลาด", data["message"] ?? "ไม่สามารถอัปเดตรูปได้");
+        } catch (_) {
+          _showDialog("เกิดข้อผิดพลาด", "การอัปเดตรูปล้มเหลว (${response.statusCode})");
+        }
+      }
+    } catch (e) {
+      print("❌ Error in _updateAssetImage: $e");
+      _showDialog("ข้อผิดพลาด", "ไม่สามารถอัปเดตรูปได้: $e");
     }
   }
 }

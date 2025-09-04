@@ -448,51 +448,139 @@ class _CountedlistState extends State<Countedlist> {
             ),
     );
   }
-
-  // ฟังก์ชันแสดงตัวเลือก: ดูรูปขนาดเต็ม หรือ อัพโหลดรูปใหม่
-  Future<void> _showImageOptions(String imageUrl, String code, int index,
+  void _showImageOptions(String imageUrl, String code, int index,
       int assetIndex, Function setStateCallback) async {
-    bool isPlaceholder = imageUrl.contains('thumb.ac-illust.com');
-    
     showModalBottomSheet(
       context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (BuildContext context) {
         return SafeArea(
-          child: Wrap(
-            children: [
-              if (!isPlaceholder) // แสดงตัวเลือก "ดูรูปขนาดเต็ม" เฉพาะเมื่อมีรูปจริง
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'ตัวเลือกรูปภาพ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                SizedBox(height: 20),
+                // ตัวเลือกต่างๆ
                 ListTile(
-                  leading: const Icon(Icons.zoom_in),
-                  title: const Text('ดูรูปขนาดเต็ม'),
+                  leading: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.zoom_in, color: Colors.blue[600]),
+                  ),
+                  title: Text('ดูรูปภาพขนาดเต็ม'),
                   onTap: () {
                     Navigator.of(context).pop();
                     _showImageDialog(imageUrl, 'รูปภาพทรัพย์สิน $code');
                   },
                 ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('เลือกจากแกลเลอรี'),
-                onTap: () async {
-                  Navigator.of(context).pop();
+                ListTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.photo_library, color: Colors.green[600]),
+                  ),
+                  title: Text('เลือกจากแกลเลอรี'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
                   await _getImage(ImageSource.gallery, code, index, assetIndex,
                       setStateCallback);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('ถ่ายภาพ'),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  await _getImage(ImageSource.camera, code, index, assetIndex,
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.camera_alt, color: Colors.orange[600]),
+                  ),
+                  title: Text('ถ่ายภาพ'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                      await _getImage(ImageSource.camera, code, index, assetIndex,
                       setStateCallback);
-                },
-              ),
-            ],
+                  },
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       },
     );
   }
+  // ฟังก์ชันแสดงตัวเลือก: ดูรูปขนาดเต็ม หรือ อัพโหลดรูปใหม่
+  // Future<void> _showImageOptions(String imageUrl, String code, int index,
+  //     int assetIndex, Function setStateCallback) async {
+  //   bool isPlaceholder = imageUrl.contains('thumb.ac-illust.com');
+    
+  //   showModalBottomSheet(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return SafeArea(
+  //         child: Wrap(
+  //           children: [
+  //             if (!isPlaceholder) // แสดงตัวเลือก "ดูรูปขนาดเต็ม" เฉพาะเมื่อมีรูปจริง
+  //               ListTile(
+  //                 leading: const Icon(Icons.zoom_in),
+  //                 title: const Text('ดูรูปขนาดเต็ม'),
+  //                 onTap: () {
+  //                   Navigator.of(context).pop();
+  //                   _showImageDialog(imageUrl, 'รูปภาพทรัพย์สิน $code');
+  //                 },
+  //               ),
+  //             ListTile(
+  //               leading: const Icon(Icons.photo_library),
+  //               title: const Text('เลือกจากแกลเลอรี'),
+  //               onTap: () async {
+  //                 Navigator.of(context).pop();
+  //                 await _getImage(ImageSource.gallery, code, index, assetIndex,
+  //                     setStateCallback);
+  //               },
+  //             ),
+  //             ListTile(
+  //               leading: const Icon(Icons.camera_alt),
+  //               title: const Text('ถ่ายภาพ'),
+  //               onTap: () async {
+  //                 Navigator.of(context).pop();
+  //                 await _getImage(ImageSource.camera, code, index, assetIndex,
+  //                     setStateCallback);
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   // ฟังก์ชันแสดงรูปภาพขนาดเต็ม
   void _showImageDialog(String imageUrl, String title) {

@@ -79,30 +79,30 @@ class _QRScannerPageState extends State<QRScannerPage> {
     }
   }
 
-  // Future<void> scanQRFromGallery() async {
-  //   try {
-  //     final ImagePicker picker = ImagePicker();
-  //     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-  //     if (pickedFile == null) return;
+  Future<void> scanQRFromGallery() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile == null) return;
 
-  //     // ใช้ mobile_scanner แทน google_mlkit
-  //     final MobileScannerController galleryController = MobileScannerController();
+      // ใช้ mobile_scanner แทน google_mlkit
+      final MobileScannerController galleryController = MobileScannerController();
       
-  //     // อ่าน QR จากรูปภาพ
-  //     final BarcodeCapture? result = await galleryController.analyzeImage(pickedFile.path);
+      // อ่าน QR จากรูปภาพ
+      final BarcodeCapture? result = await galleryController.analyzeImage(pickedFile.path);
       
-  //     if (result != null && result.barcodes.isNotEmpty) {
-  //       String qrResult = result.barcodes.first.rawValue ?? "ไม่พบข้อมูล";
-  //       await sendQRCodeToAPI(qrResult);
-  //     } else {
-  //       _showDialog("แจ้งเตือน", "ไม่พบ QR Code ในรูปภาพ");
-  //     }
+      if (result != null && result.barcodes.isNotEmpty) {
+        String qrResult = result.barcodes.first.rawValue ?? "ไม่พบข้อมูล";
+        await sendQRCodeToAPI(qrResult);
+      } else {
+        _showDialog("แจ้งเตือน", "ไม่พบ QR Code ในรูปภาพ");
+      }
       
-  //     galleryController.dispose();
-  //   } catch (e) {
-  //     _showDialog("เกิดข้อผิดพลาด", e.toString());
-  //   }
-  // }
+      galleryController.dispose();
+    } catch (e) {
+      _showDialog("เกิดข้อผิดพลาด", e.toString());
+    }
+  }
 
   // ฟังก์ชันแสดง Dialog แจ้งเตือน
   void _showDialog(String title, String message) {
@@ -185,6 +185,27 @@ class _QRScannerPageState extends State<QRScannerPage> {
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.green, width: 4),
                 borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+          // ปุ่มสแกนจากคลังภาพ
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: scanQRFromGallery,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal.shade700,
+                padding: EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: Text(
+                "สแกนจากคลังภาพ",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.04,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
