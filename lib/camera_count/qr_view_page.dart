@@ -1000,25 +1000,25 @@ class _QRViewPageState extends State<QRViewPage> {
     });
 
     try {
-      // print("🔄 เริ่มอัปโหลดรูป: ${imageFile.path}");
-      // print("📁 ขนาดไฟล์: ${await imageFile.length()} bytes");
-      // print("🏷️ รหัสทรัพย์สิน: $code, ดัชนี: $index");
+      print("🔄 เริ่มอัปโหลดรูป: ${imageFile.path}");
+      print("📁 ขนาดไฟล์: ${await imageFile.length()} bytes");
+      print("🏷️ รหัสทรัพย์สิน: $code, ดัชนี: $index");
       
       String url_checkFiles = '${Config.apiURL}/check_files_NewNAC';
-      // print("🌐 URL ตรวจสอบไฟล์: $url_checkFiles");
+      print("🌐 URL ตรวจสอบไฟล์: $url_checkFiles");
 
       var request = http.MultipartRequest('POST', Uri.parse(url_checkFiles));
       request.headers.addAll(await Config.getAuthHeaders());
       var file = await http.MultipartFile.fromPath('file', imageFile.path);
       request.files.add(file);
       
-      // print("📤 กำลังส่งไฟล์...");
+      print("📤 กำลังส่งไฟล์...");
       var response = await request.send();
       print("📡 Response Status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         var responseData = await response.stream.bytesToString();
-        // print("📋 Response Data: $responseData");
+        print("📋 Response Data: $responseData");
         
         var jsonData = json.decode(responseData);
         if (jsonData['attach'] != null && jsonData['attach'].isNotEmpty) {
@@ -1026,11 +1026,11 @@ class _QRViewPageState extends State<QRViewPage> {
           String extension = jsonData['extension'];
           String imageUrl = "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension";
           
-          // print("🔗 URL รูปภาพ: $imageUrl");
+          print("🔗 URL รูปภาพ: $imageUrl");
           
           var client = http.Client();
           var url = Uri.parse('${Config.apiURL}/FA_Mobile_UploadImage');
-          // print("🌐 URL บันทึก: $url");
+          print("🌐 URL บันทึก: $url");
           
           var uploadResponse = await client.post(
             url,
@@ -1043,15 +1043,15 @@ class _QRViewPageState extends State<QRViewPage> {
             }),
           );
           
-          // print("💾 บันทึกข้อมูล Status: ${uploadResponse.statusCode}");
-          // print("💾 บันทึกข้อมูล Response: ${uploadResponse.body}");
+          print("💾 บันทึกข้อมูล Status: ${uploadResponse.statusCode}");
+          print("💾 บันทึกข้อมูล Response: ${uploadResponse.body}");
           
           if (uploadResponse.statusCode == 200) {
             setState(() {
               listImage_count[index] = imageUrl;
             });
-            await _updateAssetImage(code, index, attValue, extension);
-            // print("✅ อัปโหลดสำเร็จ!");
+            // await _updateAssetImage(code, index, attValue, extension);
+            print("✅ อัปโหลดสำเร็จ!");
             
             // แสดง SnackBar แจ้งผลสำเร็จ
             ScaffoldMessenger.of(context).showSnackBar(
@@ -1107,53 +1107,53 @@ class _QRViewPageState extends State<QRViewPage> {
   }
 
   // ปิดฟังก์ชั่นอัพรูปลง E-Book หลังจากตรวจนับ ต.ค 2025 เสร็จ
-  Future<void> _updateAssetImage(String code, int index, String attValue, String extension) async {
-    try {
-      print("🔄 เริ่มอัปเดตข้อมูลรูปเข้าระบบ EBook...");
+  // Future<void> _updateAssetImage(String code, int index, String attValue, String extension) async {
+  //   try {
+  //     print("🔄 เริ่มอัปเดตข้อมูลรูปเข้าระบบ EBook...");
 
-      String newImageUrl = "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension";
+  //     String newImageUrl = "https://nac.purethai.co.th/NEW_NAC/$attValue.$extension";
 
-      // ใช้ข้อมูลจาก widget.qrText[0] เพราะเราไม่ได้มี list
-      var currentAsset = widget.qrText[0];
+  //     // ใช้ข้อมูลจาก widget.qrText[0] เพราะเราไม่ได้มี list
+  //     var currentAsset = widget.qrText[0];
 
-      String? image1 = index == 0 ? newImageUrl : currentAsset["ImagePath"];
-      String? image2 = index == 1 ? newImageUrl : currentAsset["ImagePath_2"];
+  //     String? image1 = index == 0 ? newImageUrl : currentAsset["ImagePath"];
+  //     String? image2 = index == 1 ? newImageUrl : currentAsset["ImagePath_2"];
 
-      print("📤 image_1: $image1");
-      print("📤 image_2: $image2");
+  //     print("📤 image_1: $image1");
+  //     print("📤 image_2: $image2");
 
-      var response = await http.post(
-        Uri.parse('${Config.apiURL}/FA_Control_Edit_EBook'),
-        headers: await Config.getAuthHeaders(),
-        body: jsonEncode({
-          "Code": code,
-          "image_1": image1,
-          "image_2": image2,
-        }),
-      );
+  //     var response = await http.post(
+  //       Uri.parse('${Config.apiURL}/FA_Control_Edit_EBook'),
+  //       headers: await Config.getAuthHeaders(),
+  //       body: jsonEncode({
+  //         "Code": code,
+  //         "image_1": image1,
+  //         "image_2": image2,
+  //       }),
+  //     );
 
-      print("📊 Status Code: ${response.statusCode}");
-      print("📄 Response: ${response.body}");
+  //     print("📊 Status Code: ${response.statusCode}");
+  //     print("📄 Response: ${response.body}");
 
-      if (response.statusCode == 200) {
-        // ✅ อัปเดตสำเร็จ — ให้ refresh รูปใหม่บน UI ด้วย
-        setState(() {
-          widget.qrText[0]["ImagePath"] = image1;
-          widget.qrText[0]["ImagePath_2"] = image2;
-        });
+  //     if (response.statusCode == 200) {
+  //       // ✅ อัปเดตสำเร็จ — ให้ refresh รูปใหม่บน UI ด้วย
+  //       setState(() {
+  //         widget.qrText[0]["ImagePath"] = image1;
+  //         widget.qrText[0]["ImagePath_2"] = image2;
+  //       });
 
-        _showDialog("อัปโหลดสำเร็จ", "อัปเดตรูป EBook กับรายงานตรวจนับทรัพย์สิน สำเร็จแล้ว");
-      } else {
-        try {
-          final data = jsonDecode(response.body);
-          _showDialog("เกิดข้อผิดพลาด", data["message"] ?? "ไม่สามารถอัปเดตรูปได้");
-        } catch (_) {
-          _showDialog("เกิดข้อผิดพลาด", "การอัปเดตรูปล้มเหลว (${response.statusCode})");
-        }
-      }
-    } catch (e) {
-      print("❌ Error in _updateAssetImage: $e");
-      _showDialog("ข้อผิดพลาด", "ไม่สามารถอัปเดตรูปได้: $e");
-    }
-  }
+  //       _showDialog("อัปโหลดสำเร็จ", "อัปเดตรูป EBook กับรายงานตรวจนับทรัพย์สิน สำเร็จแล้ว");
+  //     } else {
+  //       try {
+  //         final data = jsonDecode(response.body);
+  //         _showDialog("เกิดข้อผิดพลาด", data["message"] ?? "ไม่สามารถอัปเดตรูปได้");
+  //       } catch (_) {
+  //         _showDialog("เกิดข้อผิดพลาด", "การอัปเดตรูปล้มเหลว (${response.statusCode})");
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print("❌ Error in _updateAssetImage: $e");
+  //     _showDialog("ข้อผิดพลาด", "ไม่สามารถอัปเดตรูปได้: $e");
+  //   }
+  // }
 }
